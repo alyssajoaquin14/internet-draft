@@ -4,7 +4,7 @@
 
 WG Working Group                                                D. Habib
 Internet-Draft                                                A. Joaquin
-Intended status: Standards Track                                QuickVid
+Intended status: Standards Track                True3D Technologies Inc.
 Expires: 10 March 2025                                  6 September 2024
 
 
@@ -341,7 +341,7 @@ Internet-Draft              VoxelVideo Format             September 2024
 Authors' Addresses
 
    Daniel Habib
-   QuickVid
+   True3D Technologies Inc.
    15 Morris Ave
    Apt. 307
    Long Branch, NJ,  07740
@@ -351,7 +351,7 @@ Authors' Addresses
 
 
    Alyssa Joaquin
-   QuickVid
+   True3D Technologies Inc.
    Email: alyssa.joaquin@gmail.com
 
 

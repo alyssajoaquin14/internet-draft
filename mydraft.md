@@ -45,7 +45,7 @@ venue:
 author:
  -
     fullname: Daniel Habib
-    organization: QuickVid
+    organization: True3D Technologies Inc.
     email: daniel@quickvid.ai
     street: 
     - 15 Morris Ave
@@ -56,7 +56,7 @@ author:
     phone: '+1 908 812 8365'
  -
     fullname: Alyssa Joaquin
-    organization: QuickVid
+    organization: True3D Technologies Inc.
     email: alyssa.joaquin@gmail.com
 
 normative:
