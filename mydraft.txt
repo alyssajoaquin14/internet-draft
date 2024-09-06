@@ -1,0 +1,392 @@
+
+
+
+
+WG Working Group                                                D. Habib
+Internet-Draft                                                A. Joaquin
+Intended status: Standards Track                                QuickVid
+Expires: 10 March 2025                                  6 September 2024
+
+
+                           VoxelVideo Format
+                       draft-habib-voxelvideo-00
+
+Abstract
+
+   This document proposes the VoxelVideo format, a file structure
+   designed specifically for the efficient handling, playback, and
+   livestreaming of 3D voxel-based videos.  The format is intended for
+   applications in gaming, virtual reality, live sports, and interactive
+   media, providing a robust framework for managing complex 3D data with
+   spatial precision and color fidelity.  This document describes the
+   current JSON-based version and outlines future plans to adopt a more
+   efficent, compressed format.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://example.com/LATEST.  Status information for this document may
+   be found at https://datatracker.ietf.org/doc/draft-habib-voxelvideo/.
+
+   Discussion of this document takes place on the WG Working Group
+   mailing list (mailto:WG@example.com), which is archived at
+   https://example.com/WG.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/voxelvideos/voxel-video-file-format.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+
+
+
+
+
+
+Habib & Joaquin           Expires 10 March 2025                 [Page 1]
+
+Internet-Draft              VoxelVideo Format             September 2024
+
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 10 March 2025.
+
+Copyright Notice
+
+   Copyright (c) 2024 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
+   2.  Conventions and Definitions . . . . . . . . . . . . . . . . .   3
+   3.  VoxelVideo Format Overview  . . . . . . . . . . . . . . . . .   3
+   4.  File Structure and Key Components . . . . . . . . . . . . . .   3
+     4.1.  Version . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     4.2.  Playback Metadata . . . . . . . . . . . . . . . . . . . .   4
+     4.3.  Voxel Dimensions  . . . . . . . . . . . . . . . . . . . .   4
+     4.4.  Title . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     4.5.  Blocks Array  . . . . . . . . . . . . . . . . . . . . . .   4
+   5.  Frame Types and Future Enhancements . . . . . . . . . . . . .   5
+   6.  Interpretation of the Blocks Array  . . . . . . . . . . . . .   5
+   7.  Potential Use Cases . . . . . . . . . . . . . . . . . . . . .   5
+   8.  Future Directions . . . . . . . . . . . . . . . . . . . . . .   6
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .   6
+     11.2.  Informative References . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
+
+
+
+
+
+
+
+
+
+Habib & Joaquin           Expires 10 March 2025                 [Page 2]
+
+Internet-Draft              VoxelVideo Format             September 2024
+
+
+1.  Introduction
+
+   The VoxelVideo format addresses the need for an efficient and
+   scalable method to handle, render, and stream 3D voxel-based videos.
+   Existing video formats are not optimized for the distinct
+   characteristics of voxel data, such as spatial precision and color
+   fidelity in three dimensions.  The VoxelVideo format is tailored for
+   use in applications like gaming, virtual reality, live sports, and
+   interactive media, where real-time manipulation and playback of
+   complex 3D content are essential.  This document describes the JSON-
+   based format and outlines future enhancements, including the adoption
+   of a compressed binary format aimed at improving performance and
+   reducing file sizes.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   This document uses the following terms:
+
+   *  *Voxel*: a three-dimensional pixel representing a point in 3D
+      space with associated attributes such as color [AES].
+
+   *  *I-frame (Intra-coded frame)*: A self-contained video frame that
+      fully represents the voxel grid.
+
+   *  *P-frame (Predicted frame)*: A video frame which contains only
+      information on the differences from previous frames.
+
+3.  VoxelVideo Format Overview
+
+   The VoxelVideo format utilizes a JSON-based structure to organize 3D
+   voxel data, facilitating efficient playback and manipulation.  It is
+   designed to be straightforward to implement, with a focus on clarity
+   and accessibility in its initial version.  Future iterations will
+   shift towards a compressed binary format to enhance scalability and
+   performance.
+
+4.  File Structure and Key Components
+
+   The current structure of the VoxelVideo is as follows:
+
+
+
+
+
+
+Habib & Joaquin           Expires 10 March 2025                 [Page 3]
+
+Internet-Draft              VoxelVideo Format             September 2024
+
+
+   export default interface VoxelVideoData {
+     Version: number;        // Specifies the version of the file format
+     Framerate: number;      // Frames per second
+     Framecount: number;     // Total number of frames
+     Duration: number;       // Total duration of the video in seconds
+     Dimensions: {           // Dimensions of the voxel matrix
+       x: number;            // Width in voxels
+       y: number;            // Height in voxels
+       z: number;            // Depth in voxels
+     };
+     Title: string;          // Title of the video
+     Blocks: (string | null)[][]; // 3D array representing the voxel grid
+   }
+
+4.1.  Version
+
+   The Version field ensures compatibility across different iterations
+   of the format.
+
+4.2.  Playback Metadata
+
+   Metadata fields like Framerate, Framecount, and Duration provide
+   essential information for correct playback of the video content.
+
+4.3.  Voxel Dimensions
+
+   Dimensions defines the size of the voxel space, specifying the width,
+   height, and depth necessary for rendering.
+
+4.4.  Title
+
+   The Title field serves to identify the content of the video, for
+   easier cataloging and retrieval.
+
+4.5.  Blocks Array
+
+   The Blocks array represents the 3D voxel grid as a nested array,
+   where each inner array corresponds to a frame of the video.  Within
+   each frame, the arrays represent slices of the voxel space at varying
+   depths, providing a structured representation of the 3D voxel data
+   across the entire frame.
+
+
+
+
+
+
+
+
+
+
+Habib & Joaquin           Expires 10 March 2025                 [Page 4]
+
+Internet-Draft              VoxelVideo Format             September 2024
+
+
+5.  Frame Types and Future Enhancements
+
+   Currently, the VoxelVideo format utilizes I-frames, where each frame
+   is a complete voxel grid independent of other frames.  Future
+   versions will include P-frames, which will encode changes between
+   frames to reduce file size and improve streaming efficiency in 3D
+   environments.
+
+6.  Interpretation of the Blocks Array
+
+   To interpret the Blocks array, read the voxel grid plane by plane,
+   starting at the top-left corner of the first plane (height 0),
+   proceeding row by row from left to right.  After completing all rows
+   of a plane, move up to the next plane and repeat the process until
+   all planes are read.
+
+7.  Potential Use Cases
+
+   The VoxelVideo format is suitable for scenarios requiring real-time
+   interaction and manipulation of 3D video content.  Use cases include
+   immersive virtual reality environments where live 3D voxel video
+   streaming can deliver spatially precise and dynamic visual data.  The
+   format is also applicable in education simulations that require high-
+   fidelity 3D visualizations for teaching concepts in fields such as
+   medicine, engineering, and environmental science.  Interactive gaming
+   environments can utilize the VoxelVideo format to represent 3D voxel
+   data, allowing for the creation of fully manipulable virtual worlds
+   that support complex interactions within the game environment.
+
+   In additon, the VoxelVideo format may be used in live sports
+   broadcasting to generate 3D replays and visualizations, enabling
+   viewers to observe events from various perspectives and analyze the
+   content interactively.  This capability can provide additional
+   insights beyond traditional 2D video formats.
+
+   The VoxelVideo format supports livestreaming using Dynamic Adaptive
+   Streaming over HTTP (DASH), similar to its application for 2D videos.
+   This approach allows for efficient and scalable delivery of 3D voxel
+   video content across various devices and network conditions by
+   segmenting videos into smaller parts and encoding each segment at
+   different quality levels.
+
+
+
+
+
+
+
+
+
+
+Habib & Joaquin           Expires 10 March 2025                 [Page 5]
+
+Internet-Draft              VoxelVideo Format             September 2024
+
+
+8.  Future Directions
+
+   The current version of the VoxelVideo format (version 0.0), utilizes
+   a JSON-based structure designed for simplicity and ease of use,
+   facilitating initial development and experimentation.  Future
+   iterations will focus on enhancing performance and scalability by
+   transitioning to a compressed binary format, aiming to reduce file
+   sizes and improve data storage and retrieval efficiency.
+   Additionally, future versions will explore the implementation of
+   P-frames to encode changes between frames, further optimizing file
+   size and playback performance.  These enhancements are intended to
+   expand the format's capabilities, providing a more robust solution
+   for managing and delivering 3D voxel-based video content at scale.
+
+9.  Security Considerations
+
+   This document does not specifically address security considerations.
+   It is important for implementers of the VoxelVideo format to consider
+   the potential security implications associated with processing
+   untrusted voxel data.  Implementers should account for the worst-case
+   scenarios in terms of computational complexity, memory usage, and
+   required processing resources when handling voxel data, especially in
+   contexts like livestreaming where inputs may be dynamic and
+   unverified.
+
+10.  IANA Considerations
+
+   This document has no IANA actions.
+
+11.  References
+
+11.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+11.2.  Informative References
+
+   [AES]      Shchurova, C. I., "A methodology to design a 3D graphic
+              editor for micro-modeling of fiber-reinforced composite
+              parts", Journal Advances in Engineering Software, Volume
+              90, December 2015, Pages 76-82, 2015.
+
+
+
+Habib & Joaquin           Expires 10 March 2025                 [Page 6]
+
+Internet-Draft              VoxelVideo Format             September 2024
+
+
+Authors' Addresses
+
+   Daniel Habib
+   QuickVid
+   15 Morris Ave
+   Apt. 307
+   Long Branch, NJ,  07740
+   United States of America
+   Phone: +1 908 812 8365
+   Email: daniel@quickvid.ai
+
+
+   Alyssa Joaquin
+   QuickVid
+   Email: alyssa.joaquin@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Habib & Joaquin           Expires 10 March 2025                 [Page 7]
